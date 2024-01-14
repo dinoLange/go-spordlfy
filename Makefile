@@ -9,7 +9,11 @@ build:
 
 # Run the application
 run:
+	@templ generate
 	@go run cmd/api/main.go
+
+generate:
+	@templ generate
 
 # Create DB container
 docker-run:

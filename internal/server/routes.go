@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"go-spordlfy/internal/view"
 	"io"
 	"net/http"
 	"net/url"
@@ -25,34 +26,29 @@ type TokenResponse struct {
 	TokenType    string `json:"token_type"`
 }
 
+var Token TokenResponse
+
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
-	e.Renderer = &Template{
-		templates: template.Must(template.ParseGlob("internal/views/*.html")),
-	}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", s.HelloWorldHandler)
+	e.GET("/", s.LoginHandler)
 	e.GET("/health", s.healthHandler)
-	e.GET("/login", s.LoginHandler)
 	e.GET("/callback", s.CallbackHandler)
+
+	e.GET("/devices", s.DevicesHandler)
 
 	return e
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	return t.templates.ExecuteTemplate(w, name, data)
-}
-
-func (s *Server) HelloWorldHandler(c echo.Context) error {
-	resp := map[string]string{
-		"message": "Hello World",
+func (s *Server) DevicesHandler(c echo.Context) error {
+	devices, err := Devices()
+	if err != nil {
+		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
-	return c.JSON(http.StatusOK, resp)
+	return view.Devices(*devices).Render(c.Request().Context(), c.Response().Writer)
 }
-
-var Token TokenResponse
 
 func (s *Server) CallbackHandler(c echo.Context) error {
 	code := c.QueryParam("code")
@@ -97,11 +93,8 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
-	pageVariables := PageVariables{
-		AuthUrl: buildSpotifyURL(),
-	}
 
-	return c.Render(http.StatusOK, "login.html", pageVariables)
+	return c.Redirect(http.StatusSeeOther, "/")
 }
 
 func setAuthTokenQueryParams(authCode string, redirectURI string) url.Values {
@@ -112,15 +105,8 @@ func setAuthTokenQueryParams(authCode string, redirectURI string) url.Values {
 	return data
 }
 
-type PageVariables struct {
-	AuthUrl string
-}
-
 func (s *Server) LoginHandler(c echo.Context) error {
-	pageVariables := PageVariables{
-		AuthUrl: buildSpotifyURL(),
-	}
-	return c.Render(http.StatusOK, "login.html", pageVariables)
+	return view.Index(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func buildSpotifyURL() string {

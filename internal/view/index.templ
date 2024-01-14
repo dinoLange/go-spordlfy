@@ -1,0 +1,23 @@
+package view
+
+script activateButton(loginLink string) {
+	var link = loginLink
+	document.getElementById("loginButton").addEventListener("click", function() {
+          window.location.href = link
+        });
+}
+
+
+
+templ Index(loginLink string) {
+	<html>
+		<head>
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		</head>
+		<body onload={activateButton(loginLink)} >
+			<button id="loginButton">Login</button>
+			<button hx-get="/devices" hx-target="#devicesPlaceHolder">Geräte</button>
+			<div id="devicesPlaceHolder"></div>
+		</body>
+	</html>
+}

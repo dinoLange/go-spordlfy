@@ -1,0 +1,14 @@
+package view
+
+templ Main(name string) {
+	<html>
+		<head>
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		</head>
+		<body>
+			<h3>Hallo { name }</h3>
+			<button hx-get="/devices" hx-target="#devicesPlaceHolder">Geräte</button>
+			<div id="devicesPlaceHolder"></div>
+		</body>
+	</html>
+}

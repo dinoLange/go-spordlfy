@@ -9,15 +9,12 @@ script activateButton(loginLink string) {
 
 
 
-templ Index(loginLink string) {
+templ Login(loginLink string) {
 	<html>
 		<head>
-			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 		</head>
 		<body onload={activateButton(loginLink)} >
 			<button id="loginButton">Login</button>
-			<button hx-get="/devices" hx-target="#devicesPlaceHolder">Geräte</button>
-			<div id="devicesPlaceHolder"></div>
 		</body>
 	</html>
 }

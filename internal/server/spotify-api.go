@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-func Devices() (*data.DeviceResponse, error) {
+func Devices(accessToken string) (*data.DeviceResponse, error) {
 	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/player/devices", nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Bearer "+Token.AccessToken)
+	req.Header.Add("Authorization", "Bearer "+accessToken)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

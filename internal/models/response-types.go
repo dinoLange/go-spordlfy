@@ -1,4 +1,4 @@
-package data
+package models
 
 type DeviceResponse struct {
 	Devices []struct {

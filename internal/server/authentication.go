@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go-spordlfy/internal/database"
+	"go-spordlfy/internal/models"
 	"io"
 	"net/http"
 	"net/url"
@@ -109,7 +109,7 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
 
-	userSession := database.UserSession{
+	userSession := models.UserSession{
 		ID:           uuid.New().String(),
 		Name:         "Not implemented",
 		SessionID:    uuid.New().String(),

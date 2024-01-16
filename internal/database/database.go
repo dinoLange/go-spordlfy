@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"go-spordlfy/internal/models"
 	"log"
 	"os"
 	"time"
@@ -14,21 +15,12 @@ import (
 
 type Service interface {
 	Health() map[string]string
-	CreateUserSession(UserSession)
-	LoadSessionBySessionId(string) (*UserSession, error)
+	CreateUserSession(models.UserSession)
+	LoadSessionBySessionId(string) (*models.UserSession, error)
 }
 
 type service struct {
 	db *sql.DB
-}
-
-type UserSession struct {
-	ID           string
-	Name         string
-	SessionID    string
-	AccessToken  string
-	RefreshToken string
-	ExpiryTime   time.Time
 }
 
 var (
@@ -74,7 +66,7 @@ func (s *service) Health() map[string]string {
 	}
 }
 
-func (s *service) CreateUserSession(userSession UserSession) {
+func (s *service) CreateUserSession(userSession models.UserSession) {
 	_, err := s.db.Exec("INSERT INTO usersession (id, name, sessionid, accesstoken, refreshtoken, expirytime) VALUES (?, ?, ?, ?, ?, ?)",
 		userSession.ID, userSession.Name, userSession.SessionID, userSession.AccessToken, userSession.RefreshToken, userSession.ExpiryTime)
 	if err != nil {
@@ -82,10 +74,10 @@ func (s *service) CreateUserSession(userSession UserSession) {
 	}
 }
 
-func (s *service) LoadSessionBySessionId(sessionId string) (*UserSession, error) {
+func (s *service) LoadSessionBySessionId(sessionId string) (*models.UserSession, error) {
 	row := s.db.QueryRow("SELECT * FROM usersession WHERE sessionid = ?", sessionId)
 
-	var userSession UserSession
+	var userSession models.UserSession
 	err := row.Scan(
 		&userSession.ID,
 		&userSession.Name,

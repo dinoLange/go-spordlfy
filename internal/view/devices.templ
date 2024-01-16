@@ -1,11 +1,11 @@
 package view
 
-import(
-	"go-spordlfy/internal/data"
-)
+import "go-spordlfy/internal/models"
 
 
-templ Devices(deviceResponse data.DeviceResponse) {
+
+
+templ Devices(deviceResponse models.DeviceResponse) {
      <ul>
         for _, device := range deviceResponse.Devices {
             <li>{ device.Name }</li>

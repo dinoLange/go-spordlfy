@@ -2,6 +2,8 @@ package server
 
 import (
 	"database/sql"
+	"fmt"
+	"go-spordlfy/internal/models"
 	"go-spordlfy/internal/view"
 	"net/http"
 	"text/template"
@@ -28,15 +30,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 }
 
 func (s *Server) DevicesHandler(c echo.Context) error {
-	sessionCookie, err := c.Cookie("session_id")
+	userSession, err := s.getUserSession(c)
 	if err != nil {
-		return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
-	}
-	userSession, err := s.db.LoadSessionBySessionId(sessionCookie.Value)
-	if err == sql.ErrNoRows {
-		return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
-	}
+		if err == sql.ErrNoRows {
+			return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
+		}
+		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 
+	}
 	devices, err := Devices(userSession.AccessToken)
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
@@ -45,14 +46,25 @@ func (s *Server) DevicesHandler(c echo.Context) error {
 }
 
 func (s *Server) MainHandler(c echo.Context) error {
-	sessionCookie, err := c.Cookie("session_id")
+	fmt.Println("hello from main")
+	userSession, err := s.getUserSession(c)
 	if err != nil {
-		return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
-	}
-	userSession, err := s.db.LoadSessionBySessionId(sessionCookie.Value)
-	if err == sql.ErrNoRows {
-		return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
-	}
+		fmt.Println("")
+		fmt.Println("err")
+		fmt.Println(err)
+		if err != nil {
+			return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
+		}
 
+	}
 	return view.Main(userSession.Name).Render(c.Request().Context(), c.Response().Writer)
+}
+
+func (s *Server) getUserSession(c echo.Context) (*models.UserSession, error) {
+	sessionCookie, err := c.Cookie("session_id")
+
+	if err != nil {
+		return nil, err
+	}
+	return s.db.LoadSessionBySessionId(sessionCookie.Value)
 }

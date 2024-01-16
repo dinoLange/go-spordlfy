@@ -6,15 +6,10 @@ import (
 	"go-spordlfy/internal/models"
 	"go-spordlfy/internal/view"
 	"net/http"
-	"text/template"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
-
-type Template struct {
-	templates *template.Template
-}
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
@@ -49,15 +44,12 @@ func (s *Server) MainHandler(c echo.Context) error {
 	fmt.Println("hello from main")
 	userSession, err := s.getUserSession(c)
 	if err != nil {
-		fmt.Println("")
-		fmt.Println("err")
-		fmt.Println(err)
 		if err != nil {
 			return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
 		}
 
 	}
-	return view.Main(userSession.Name).Render(c.Request().Context(), c.Response().Writer)
+	return view.Main(userSession.Name, userSession.AccessToken).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (s *Server) getUserSession(c echo.Context) (*models.UserSession, error) {

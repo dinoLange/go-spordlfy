@@ -26,6 +26,14 @@ type TokenResponse struct {
 	TokenType    string `json:"token_type"`
 }
 
+type RefreshTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	Scope        string `json:"scope"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type Profile struct {
 	DisplayName  string `json:"display_name"`
 	ExternalUrls struct {
@@ -58,12 +66,56 @@ func buildSpotifyURL() string {
 	)
 }
 
+func (s *Server) RefreshAccessToken(session *models.UserSession) error {
+	data := setRefreshTokenQueryParams(session.RefreshToken)
+	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(clientId+":"+clientSecret)))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			fmt.Errorf(err.Error())
+		}
+	}()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("spotify: got %d status code: %s", resp.StatusCode, body)
+	}
+	var response RefreshTokenResponse
+	err = json.Unmarshal([]byte(string(body)), &response)
+
+	if err != nil {
+		return err
+	}
+	session.AccessToken = response.AccessToken
+	session.ExpiryTime = time.Now().Add(time.Duration(response.ExpiresIn) * time.Second)
+	session.RefreshToken = response.RefreshToken
+	s.db.UpdateUserSession(session)
+
+	return nil
+
+}
+
 func (s *Server) CallbackHandler(c echo.Context) error {
 	code := c.QueryParam("code")
 	//state := c.QueryParam("state")
+
 	data := setAuthTokenQueryParams(code, "http://localhost:4200/callback")
 	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
-
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
@@ -96,14 +148,9 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 
 	if resp.StatusCode != 200 {
 		http.Error(c.Response().Writer, fmt.Sprintf("spotify: got %d status code: %s", resp.StatusCode, body), http.StatusInternalServerError)
-
 	}
-	var token TokenResponse
-	err = json.Unmarshal([]byte(string(body)), &token)
-
-	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
-	}
+	var response TokenResponse
+	err = json.Unmarshal([]byte(string(body)), &response)
 
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
@@ -113,12 +160,12 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 		ID:           uuid.New().String(),
 		Name:         "Not implemented",
 		SessionID:    uuid.New().String(),
-		AccessToken:  token.AccessToken,
-		RefreshToken: token.RefreshToken,
-		ExpiryTime:   time.Now().Add(time.Duration(token.ExpiresIn) * time.Second),
+		AccessToken:  response.AccessToken,
+		RefreshToken: response.RefreshToken,
+		ExpiryTime:   time.Now().Add(time.Duration(response.ExpiresIn) * time.Second),
 	}
 
-	s.db.CreateUserSession(userSession)
+	s.db.CreateUserSession(&userSession)
 
 	cookie := new(http.Cookie)
 	cookie.Name = "session_id"
@@ -131,9 +178,16 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 
 func setAuthTokenQueryParams(authCode string, redirectURI string) url.Values {
 	data := url.Values{}
-
 	data.Set("grant_type", "authorization_code")
 	data.Set("code", authCode)
 	data.Set("redirect_uri", redirectURI)
+	return data
+}
+
+func setRefreshTokenQueryParams(refreshToken string) url.Values {
+	data := url.Values{}
+	data.Set("grant_type", "refresh_token")
+	data.Set("refresh_token", refreshToken)
+	data.Set("client_id", clientId)
 	return data
 }

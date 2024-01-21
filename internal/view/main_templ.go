@@ -11,19 +11,12 @@ import "io"
 import "bytes"
 
 import "html/template"
+import "os"
 
-func spotifyWebPlayerActions(accessToken string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name:       `__templ_spotifyWebPlayerActions_75a1`,
-		Function:   `function __templ_spotifyWebPlayerActions_75a1(accessToken){}`,
-		Call:       templ.SafeScript(`__templ_spotifyWebPlayerActions_75a1`, accessToken),
-		CallInline: templ.SafeScriptInline(`__templ_spotifyWebPlayerActions_75a1`, accessToken),
-	}
-}
+var wd, err = os.Getwd()
+var goTemplate = template.Must(template.New("player.html").ParseFiles(wd + "/internal/view/player.html"))
 
-var goTemplate = template.Must(template.New("player.html").ParseFiles("internal/view/player.html"))
-
-func Main(name string, accessToken string) templ.Component {
+func Main(accessToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -36,7 +29,7 @@ func Main(name string, accessToken string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><script src=\"https://unpkg.com/htmx.org@1.9.10\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><link href=\"https://unpkg.com/water.css@2/out/dark.css\" rel=\"stylesheet\"><script src=\"https://unpkg.com/htmx.org@1.9.10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,17 +59,8 @@ func Main(name string, accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var4 := `Hallo `
+		templ_7745c5c3_Var4 := `Gotify`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/view/main.templ`, Line: 23, Col: 19}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -84,12 +68,21 @@ func Main(name string, accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var6 := `Geräte`
+		templ_7745c5c3_Var5 := `Geräte`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><div id=\"devicesPlaceHolder\"></div><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var6 := `Search`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><div id=\"devicesPlaceHolder\"></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form><div id=\"searchResult\"></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

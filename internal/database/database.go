@@ -15,7 +15,8 @@ import (
 
 type Service interface {
 	Health() map[string]string
-	CreateUserSession(models.UserSession)
+	CreateUserSession(*models.UserSession)
+	UpdateUserSession(*models.UserSession)
 	LoadSessionBySessionId(string) (*models.UserSession, error)
 }
 
@@ -66,9 +67,23 @@ func (s *service) Health() map[string]string {
 	}
 }
 
-func (s *service) CreateUserSession(userSession models.UserSession) {
+func (s *service) CreateUserSession(userSession *models.UserSession) {
 	_, err := s.db.Exec("INSERT INTO usersession (id, name, sessionid, accesstoken, refreshtoken, expirytime) VALUES (?, ?, ?, ?, ?, ?)",
 		userSession.ID, userSession.Name, userSession.SessionID, userSession.AccessToken, userSession.RefreshToken, userSession.ExpiryTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (s *service) UpdateUserSession(userSession *models.UserSession) {
+	_, err := s.db.Exec("UPDATE usersession set name = ?, accesstoken = ?,  expirytime = ? WHERE id = ?",
+		userSession.Name, userSession.AccessToken, userSession.ExpiryTime, userSession.ID)
+	//refresh token is not always returned
+	if userSession.RefreshToken != "" {
+		_, err = s.db.Exec("UPDATE usersession set refreshtoken = ? WHERE id = ?",
+			userSession.RefreshToken, userSession.ID)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}

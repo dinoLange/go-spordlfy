@@ -1,0 +1,22 @@
+package view
+
+import "go-spordlfy/internal/models"
+
+templ SearchResultView(searchReponse models.SearchResponse) {
+	<div>
+        <p>Album</p>
+		<ul>
+			for _, album := range searchReponse.Albums.Items {
+				<li>{ album.Name }</li>
+			}
+		</ul>
+	</div>
+	<div>
+        <p>Track</p>
+		<ul>
+			for _, track := range searchReponse.Tracks.Items {
+				<li>{ track.Name }</li>
+			}
+		</ul>
+	</div>
+}

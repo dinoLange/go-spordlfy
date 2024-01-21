@@ -5,12 +5,12 @@ all: build
 
 build:
 	@echo "Building..."
-	@go build -o main cmd/api/main.go
+	@go build -o main main.go
 
 # Run the application
 run:
 	@templ generate
-	@go run cmd/api/main.go
+	@go run main.go
 
 generate:
 	@templ generate

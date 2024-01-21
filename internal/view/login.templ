@@ -12,6 +12,7 @@ script activateButton(loginLink string) {
 templ Login(loginLink string) {
 	<html>
 		<head>
+			<link href="https://unpkg.com/water.css@2/out/dark.css" rel="stylesheet"></link>
 		</head>
 		<body onload={activateButton(loginLink)} >
 			<button id="loginButton">Login</button>

@@ -2,28 +2,30 @@ package view
 
 
 import "html/template"
+import "os"
 
+var wd, err = os.Getwd()
+var goTemplate = template.Must(template.New("player.html").ParseFiles(wd + "/internal/view/player.html"))
 
-script spotifyWebPlayerActions(accessToken string) {
-
-
-}
-
-var goTemplate = template.Must(template.New("player.html").ParseFiles("internal/view/player.html"))
-
-
-
-templ Main(name string, accessToken string) {
+templ Main(accessToken string) {
 	<html>
 		<head>
+		    <link href="https://unpkg.com/water.css@2/out/dark.css" rel="stylesheet"></link>
+
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<script src="https://sdk.scdn.co/spotify-player.js"></script>			
 			@templ.FromGoHTML(goTemplate, accessToken)
 		</head>
-		<body >
-			<h3>Hallo { name }</h3>
+		<body>
+			<h3>Gotify</h3>
 			<button hx-get="/devices" hx-target="#devicesPlaceHolder">Geräte</button>
 			<div id="devicesPlaceHolder"></div>
+			
+			<form hx-post="/search" hx-target="#searchResult">
+			  	<input type="text" name="term" ></input>
+				<button >Search</button>
+			</form>
+			<div id="searchResult"></div>
 		</body>
 	</html>
 }

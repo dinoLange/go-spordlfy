@@ -20,14 +20,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.GET("/login", LoginHandler)
 
 	e.GET("/", MainHandler)
-	e.GET("/devices", DevicesHandler)
+	e.GET("/devices", s.DevicesHandler)
 	e.POST("/search", SearchHandler)
 
-	return e
-}
+	e.GET("/play", PlayHandler)
 
-func LoginHandler(c echo.Context) error {
-	return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
+	return e
 }
 
 func MainHandler(c echo.Context) error {
@@ -38,7 +36,7 @@ func MainHandler(c echo.Context) error {
 	return view.Main(session.AccessToken).Render(c.Request().Context(), c.Response().Writer)
 }
 
-func DevicesHandler(c echo.Context) error {
+func (s *Server) DevicesHandler(c echo.Context) error {
 	session, ok := c.Get(sessionContext).(*models.UserSession)
 	if !ok {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
@@ -48,6 +46,7 @@ func DevicesHandler(c echo.Context) error {
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
+	s.db.UpdateDevice(session.ID, devices.Devices[0].ID)
 	return view.Devices(*devices).Render(c.Request().Context(), c.Response().Writer)
 }
 
@@ -64,4 +63,20 @@ func SearchHandler(c echo.Context) error {
 	}
 
 	return view.SearchResultView(*searchResponse).Render(c.Request().Context(), c.Response().Writer)
+}
+
+func PlayHandler(c echo.Context) error {
+	session, ok := c.Get(sessionContext).(*models.UserSession)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+	}
+
+	uri := c.QueryParam("uri")
+	err := Play(session, uri)
+	if err != nil {
+		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	return c.String(http.StatusNoContent, "played "+uri)
+
 }

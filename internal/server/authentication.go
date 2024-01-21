@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-spordlfy/internal/models"
+	"go-spordlfy/internal/view"
 	"io"
 	"net/http"
 	"net/url"
@@ -107,7 +108,10 @@ func (s *Server) RefreshAccessToken(session *models.UserSession) error {
 	s.db.UpdateUserSession(session)
 
 	return nil
+}
 
+func LoginHandler(c echo.Context) error {
+	return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func (s *Server) CallbackHandler(c echo.Context) error {

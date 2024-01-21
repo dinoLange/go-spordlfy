@@ -7,7 +7,7 @@ templ SearchResultView(searchReponse models.SearchResponse) {
         <p>Album</p>
 		<ul>
 			for _, album := range searchReponse.Albums.Items {
-				<li>{ album.Name }</li>
+				<li>{ album.Name } <button hx-get={"/play?uri=" + album.URI}>Play</button></li>
 			}
 		</ul>
 	</div>
@@ -15,7 +15,7 @@ templ SearchResultView(searchReponse models.SearchResponse) {
         <p>Track</p>
 		<ul>
 			for _, track := range searchReponse.Tracks.Items {
-				<li>{ track.Name }</li>
+				<li>{ track.Name } <button hx-get={"/play?uri=" + track.URI}>Play</button></li>
 			}
 		</ul>
 	</div>

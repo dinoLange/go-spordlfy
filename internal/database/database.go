@@ -17,6 +17,7 @@ type Service interface {
 	Health() map[string]string
 	CreateUserSession(*models.UserSession)
 	UpdateUserSession(*models.UserSession)
+	UpdateDevice(string, string)
 	LoadSessionBySessionId(string) (*models.UserSession, error)
 }
 
@@ -43,7 +44,8 @@ func New() Service {
 			sessionid TEXT,
 			accesstoken TEXT,
 			refreshtoken TEXT,
-			expirytime DATETIME
+			expirytime DATETIME, 
+			currentdeviceid TEXT
 		)
 	`)
 	if err != nil {
@@ -68,8 +70,8 @@ func (s *service) Health() map[string]string {
 }
 
 func (s *service) CreateUserSession(userSession *models.UserSession) {
-	_, err := s.db.Exec("INSERT INTO usersession (id, name, sessionid, accesstoken, refreshtoken, expirytime) VALUES (?, ?, ?, ?, ?, ?)",
-		userSession.ID, userSession.Name, userSession.SessionID, userSession.AccessToken, userSession.RefreshToken, userSession.ExpiryTime)
+	_, err := s.db.Exec("INSERT INTO usersession (id, name, sessionid, accesstoken, refreshtoken, expirytime, currentdeviceid) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		userSession.ID, userSession.Name, userSession.SessionID, userSession.AccessToken, userSession.RefreshToken, userSession.ExpiryTime, "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,6 +91,13 @@ func (s *service) UpdateUserSession(userSession *models.UserSession) {
 	}
 }
 
+func (s *service) UpdateDevice(userId string, deviceId string) {
+	_, err := s.db.Exec("UPDATE usersession set currentdeviceid = ? WHERE id = ?", deviceId, userId)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func (s *service) LoadSessionBySessionId(sessionId string) (*models.UserSession, error) {
 	row := s.db.QueryRow("SELECT * FROM usersession WHERE sessionid = ?", sessionId)
 
@@ -100,6 +109,7 @@ func (s *service) LoadSessionBySessionId(sessionId string) (*models.UserSession,
 		&userSession.AccessToken,
 		&userSession.RefreshToken,
 		&userSession.ExpiryTime,
+		&userSession.CurrentDeviceId,
 	)
 	if err == sql.ErrNoRows {
 		return nil, err

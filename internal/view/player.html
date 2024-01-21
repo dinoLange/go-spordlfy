@@ -1,5 +1,8 @@
 <script>    
-    window.onbeforeunload = () => this.player.disconnect();  
+    window.onbeforeunload = () =>  {
+        this.player.disconnect();
+        return undefined;
+    }  
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = {{ . }};

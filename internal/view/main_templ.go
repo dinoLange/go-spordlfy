@@ -64,21 +64,12 @@ func Main(accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><button hx-get=\"/devices\" hx-target=\"#devicesPlaceHolder\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><div id=\"devices\" hx-get=\"/devices\" hx-trigger=\"spotify-sdk-finished from:body\" hx-target=\"this\"></div><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var5 := `Geräte`
+		templ_7745c5c3_Var5 := `Search`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><div id=\"devicesPlaceHolder\"></div><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var6 := `Search`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

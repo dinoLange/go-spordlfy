@@ -20,9 +20,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	e.GET("/login", LoginHandler)
 
 	e.GET("/", MainHandler)
-	e.GET("/devices", s.DevicesHandler)
-	e.POST("/search", SearchHandler)
 
+	e.GET("/devices", s.DevicesHandler)
+	e.POST("/selectdevice", s.SelectDeviceHandler)
+
+	e.POST("/search", SearchHandler)
 	e.GET("/play", PlayHandler)
 
 	return e
@@ -46,8 +48,24 @@ func (s *Server) DevicesHandler(c echo.Context) error {
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
-	s.db.UpdateDevice(session.ID, devices.Devices[0].ID)
+	if len(devices.Devices) > 0 {
+		s.db.UpdateDevice(session.ID, devices.Devices[0].ID)
+	}
+
 	return view.Devices(*devices).Render(c.Request().Context(), c.Response().Writer)
+}
+
+func (s *Server) SelectDeviceHandler(c echo.Context) error {
+	session, ok := c.Get(sessionContext).(*models.UserSession)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+	}
+	deviceId := c.FormValue("device")
+	if deviceId == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "No device id set")
+	}
+	s.db.UpdateDevice(session.ID, deviceId)
+	return c.String(http.StatusNoContent, "set device "+deviceId)
 }
 
 func SearchHandler(c echo.Context) error {

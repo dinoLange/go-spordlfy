@@ -3,18 +3,21 @@
         this.player.disconnect();
         return undefined;
     }  
+    
+
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = {{ . }};
         
         this.player = new Spotify.Player({
-            name: 'Web Playback SDK Quick Start Player',
+            name: 'Gotify',
             getOAuthToken: cb => { cb(token); },
             volume: 0.5
         });
         this.player.connect();
 
         this.player.addListener('ready', ({ device_id }) => {
+            htmx.trigger("#devices", "spotify-sdk-finished");
             console.log('Ready with Device ID', device_id);
         });
 
@@ -33,6 +36,7 @@
         this.player.addListener('account_error', ({ message }) => {
             console.error(message);
         });
+
     }
 
 </script>

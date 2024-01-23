@@ -72,12 +72,14 @@ func Play(session *models.UserSession, uri string) error {
 		return err
 	}
 	req.Header.Add("Authorization", "Bearer "+session.AccessToken)
-	fmt.Println(req)
 
 	resp, err := client.Do(req)
 	fmt.Println(resp)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Play call got %d status code: %s", resp.StatusCode, resp.Body)
 	}
 	return nil
 }

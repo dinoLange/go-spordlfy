@@ -13,6 +13,7 @@ const sessionContext = "session"
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
+	e.Static("/static", "internal/static")
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(s.checkSessionMiddleware)

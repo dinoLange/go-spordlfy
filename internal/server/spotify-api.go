@@ -78,7 +78,7 @@ func Play(session *models.UserSession, uri string) error {
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 202 {
 		return fmt.Errorf("Play call got %d status code: %s", resp.StatusCode, resp.Body)
 	}
 	return nil

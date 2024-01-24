@@ -25,6 +25,52 @@ class SpotifyWebPlayer extends HTMLElement {
                     justify-content: center;
                 }
 
+                input[type="range"] {
+                    margin-top: 10px;
+                    overflow: hidden;
+                    -webkit-appearance: none;
+                    width: 80%;
+                    height: 6px;
+                    background: #535353;
+                    outline: none;
+                    opacity: 0.7;
+                    -webkit-transition: .2s;
+                    transition: opacity .2s;
+                }
+        
+                input[type="range"]:hover {
+                    opacity: 1;
+                }
+
+                
+        
+                input[type="range"]::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 16px;
+                    height: 16px;
+                    background: #1DB954;
+                    cursor: pointer;
+                    box-shadow: -80px 0 0 80px #1DB954;
+
+                }
+        
+                input[type="range"]::-moz-range-thumb {
+                    width: 16px;
+                    height: 16px;
+                    background: #1DB954;
+                    cursor: pointer;
+                }
+        
+                input[type="range"]::-webkit-slider-thumb:hover {
+                    background: #1DB954;
+                }
+        
+                input[type="range"]::-moz-range-thumb:hover {
+                    background: #1DB954;
+                }
+        
+
                 progress {
                     width: 100%;
                     height: 10px;
@@ -32,6 +78,7 @@ class SpotifyWebPlayer extends HTMLElement {
                     appearance: none;
                     background-color: #535353;
                     border-radius: 5px;
+                    cursor: pointer;
                 }
         
                 progress::-webkit-progress-bar {
@@ -40,7 +87,7 @@ class SpotifyWebPlayer extends HTMLElement {
                 }
             
                 progress::-webkit-progress-value {
-                    background-color: #1db954;
+                    background-color: #1DB954;
                     border-radius: 5px;
                 }
           
@@ -71,7 +118,7 @@ class SpotifyWebPlayer extends HTMLElement {
                 }
           
                 .control-button {
-                    background-color: #1db954;
+                    background-color: #1DB954;
                     color: #ffffff;
                     border: none;
                     border-radius: 50%;
@@ -90,6 +137,9 @@ class SpotifyWebPlayer extends HTMLElement {
                     <button class="control-button" id="play-button">▶</button>
                     <button class="control-button" id="next-button">&gt;</button>
                 </div>
+
+                <input id="volume-input" type="range" id="volumeControl" min="0" max="100" value="50">
+
             </div>
         `;
 
@@ -97,6 +147,8 @@ class SpotifyWebPlayer extends HTMLElement {
         this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handlePreviousTrack());
         this.shadowRoot.getElementById("play-button").addEventListener('click', () => this.handleTogglePlay());
         this.shadowRoot.getElementById("next-button").addEventListener('click', () => this.handleNextTrack());
+
+
 
         this.progress = this.shadowRoot.getElementById("track-progress");
         this.interval = setInterval(() => this.updateProgressBar(100), 100);
@@ -108,16 +160,21 @@ class SpotifyWebPlayer extends HTMLElement {
             console.log(clickedValue)
             self.seekToPosition(parseInt(clickedValue));
         });
+        this.shadowRoot.getElementById("volume-input").addEventListener('click', function (e) {
+            self.setVolume(this.value/100)
+        });
+
 
     }
 
 
-
+    setVolume(volumeLevel) {
+        this.player.setVolume(volumeLevel).then(() => console.log('Volume updated!'));
+    }
 
     seekToPosition(positionInMs) {
         this.player.seek(positionInMs).then(() => {
             console.log('Changed position!');
-
         });
     }
 
@@ -130,7 +187,6 @@ class SpotifyWebPlayer extends HTMLElement {
     }
 
     handleNextTrack() {
-        console.log("next")
         this.player.nextTrack()
     }
 
@@ -210,6 +266,7 @@ class SpotifyWebPlayer extends HTMLElement {
                 duration,
                 track_window: { current_track }
             }) => {
+                console.log("change");
                 this.changeTrackLabels(current_track.name, current_track.artists[0].name);
                 this.togglePlayContent(paused)
                 this.updateTrackProgress(duration, position)

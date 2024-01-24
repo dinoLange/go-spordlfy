@@ -96,22 +96,30 @@ class SpotifyWebPlayer extends HTMLElement {
         // Attach event listeners to the buttons
         this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handlePreviousTrack());
         this.shadowRoot.getElementById("play-button").addEventListener('click', () => this.handleTogglePlay());
-        this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handleNextTrack());
+        this.shadowRoot.getElementById("next-button").addEventListener('click', () => this.handleNextTrack());
 
         this.progress = this.shadowRoot.getElementById("track-progress");
         this.interval = setInterval(() => this.updateProgressBar(100), 100);
-        
+
+        var self = this
         this.shadowRoot.getElementById('track-progress').addEventListener('click', function (e) {
-            var x = e.pageX - this.offsetLeft, // or e.offsetX (less support, though)
-                y = e.pageY - this.offsetTop,  // or e.offsetY
-                clickedValue = x * this.max / this.offsetWidth;
-        
-            console.log(x, y);
-            console.log(clickedValue);
+            var x = e.pageX - this.offsetLeft; // or e.offsetX (less support, though)
+            var clickedValue = x * this.max / this.offsetWidth;
+            console.log(clickedValue)
+            self.seekToPosition(parseInt(clickedValue));
         });
+
     }
 
 
+
+
+    seekToPosition(positionInMs) {
+        this.player.seek(positionInMs).then(() => {
+            console.log('Changed position!');
+
+        });
+    }
 
     handlePreviousTrack() {
         this.player.previousTrack()
@@ -122,11 +130,12 @@ class SpotifyWebPlayer extends HTMLElement {
     }
 
     handleNextTrack() {
+        console.log("next")
         this.player.nextTrack()
     }
 
     updateProgressBar(progressInMs) {
-        if(!this.paused) {
+        if (!this.paused) {
             const currentValue = this.progress.value;
             this.progress.value = currentValue + progressInMs;
         }
@@ -152,7 +161,7 @@ class SpotifyWebPlayer extends HTMLElement {
     }
 
     togglePlayContent(paused) {
-        this.paused=paused
+        this.paused = paused
         const playButton = this.shadowRoot.getElementById("play-button");
         // unexpected but correct
         if (paused) {

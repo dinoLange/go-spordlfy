@@ -5,9 +5,12 @@ class SpotifyWebPlayer extends HTMLElement {
     accesstoken
     static observedAttributes = ["accesstoken"];
 
+    playIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" class="Svg-sc-ytk21e-0 dYnaPI"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"></path></svg>')
+    pauseIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" class="Svg-sc-ytk21e-0 dYnaPI"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"></path></svg>')
+
+
     constructor() {
         super();
-
         // Create a shadow root
         this.attachShadow({ mode: 'open' });
 
@@ -117,9 +120,16 @@ class SpotifyWebPlayer extends HTMLElement {
                     margin-top: 20px;
                 }
           
+                .play-button {
+                    background-color: #ffffff;
+                    border: none;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    cursor: pointer;
+                }               
                 .control-button {
-                    background-color: #1DB954;
-                    color: #ffffff;
+                    background-color: #222326;
                     border: none;
                     border-radius: 50%;
                     width: 40px;
@@ -132,16 +142,30 @@ class SpotifyWebPlayer extends HTMLElement {
                 <div id="track-title">Song Title</div>
                 <div id="artist">Artist Name</div>
                 <progress id="track-progress" value="100" max="100"></progress>
+
                 <div id="controls">
-                    <button class="control-button" id="back-button">&lt;</button>
-                    <button class="control-button" id="play-button">▶</button>
-                    <button class="control-button" id="next-button">&gt;</button>
+                    <button class="control-button" id="back-button">
+                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" >
+                            <path fill="#b3b3b3" d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-.7.7H1.7a.7.7 0 0 1-.7-.7V1.7a.7.7 0 0 1 .7-.7h1.6z"></path>
+                        </svg>
+                    </button>
+                    <button class="play-button" id="play-button"></button>
+                    <button class="control-button" id="next-button">         
+                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" >
+                            <path fill="#b3b3b3" d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 .7.7h1.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-1.6z"></path>
+                        </svg>
+                    </button>
                 </div>
 
                 <input id="volume-input" type="range" id="volumeControl" min="0" max="100" value="50">
 
             </div>
         `;
+
+        
+        this.shadowRoot.getElementById("play-button").replaceChildren(this.playIcon);
+      
+
 
         // Attach event listeners to the buttons
         this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handlePreviousTrack());
@@ -156,16 +180,29 @@ class SpotifyWebPlayer extends HTMLElement {
         var self = this
         this.shadowRoot.getElementById('track-progress').addEventListener('click', function (e) {
             var x = e.pageX - this.offsetLeft; // or e.offsetX (less support, though)
-            var clickedValue = x * this.max / this.offsetWidth;
+            var clickedValue = this.getValue();
             console.log(clickedValue)
             self.seekToPosition(parseInt(clickedValue));
         });
-        this.shadowRoot.getElementById("volume-input").addEventListener('click', function (e) {
-            self.setVolume(this.value/100)
+        this.shadowRoot.getElementById("track-progress").addEventListener('click', function (e) {
+            self.setVolume(this.value / 100)
+            self.seekToPosition(parseInt(clickedValue));
+
         });
-
-
+        this.shadowRoot.getElementById("volume-input").addEventListener('click', function (e) {
+            self.setVolume(this.value / 100)
+        });
     }
+
+
+    createElementFromHTML(htmlString) {
+        var div = document.createElement('div');
+        div.innerHTML = htmlString.trim();
+
+        // Change this to div.childNodes to support multiple top-level nodes.
+        return div.firstChild;
+    }
+
 
 
     setVolume(volumeLevel) {
@@ -221,9 +258,9 @@ class SpotifyWebPlayer extends HTMLElement {
         const playButton = this.shadowRoot.getElementById("play-button");
         // unexpected but correct
         if (paused) {
-            playButton.textContent = '▶'
+            playButton.replaceChildren(this.playIcon)
         } else {
-            playButton.textContent = '||'
+            playButton.replaceChildren(this.pauseIcon)
         }
     }
 
@@ -266,7 +303,6 @@ class SpotifyWebPlayer extends HTMLElement {
                 duration,
                 track_window: { current_track }
             }) => {
-                console.log("change");
                 this.changeTrackLabels(current_track.name, current_track.artists[0].name);
                 this.togglePlayContent(paused)
                 this.updateTrackProgress(duration, position)

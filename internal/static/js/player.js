@@ -1,12 +1,12 @@
 class SpotifyWebPlayer extends HTMLElement {
     player
-    paused
+    paused = true
     progress
     accesstoken
     static observedAttributes = ["accesstoken"];
 
-    playIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" class="Svg-sc-ytk21e-0 dYnaPI"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"></path></svg>')
-    pauseIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" class="Svg-sc-ytk21e-0 dYnaPI"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"></path></svg>')
+    playIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"></path></svg>')
+    pauseIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"></path></svg>')
 
 
     constructor() {
@@ -29,7 +29,6 @@ class SpotifyWebPlayer extends HTMLElement {
                 }
 
                 input[type="range"] {
-                    margin-top: 10px;
                     overflow: hidden;
                     -webkit-appearance: none;
                     width: 80%;
@@ -111,13 +110,24 @@ class SpotifyWebPlayer extends HTMLElement {
                 #artist {
                     font-size: 14px;
                     color: #b3b3b3;
-                    margin-bottom: 20px;
+                    margin-bottom: 10px;
                 }
           
                 #controls {
                     display: flex;
                     justify-content: space-between;
-                    margin-top: 20px;
+                    margin-top: 10px;
+                }        
+
+                #progress {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    align-items: center;
+                }
+
+                #volume-input {
+                    margin-top: 10px;
                 }
           
                 .play-button {
@@ -141,17 +151,20 @@ class SpotifyWebPlayer extends HTMLElement {
             <div id="spotify-container">
                 <div id="track-title">Song Title</div>
                 <div id="artist">Artist Name</div>
-                <progress id="track-progress" value="100" max="100"></progress>
-
+                <div id="progress">
+                    <div id="current-time">0:00</div>
+                    <input id="track-progress-input" type="range" min="0" max="100" value="0"></input>
+                    <div id="max-time">0:00</div>
+                </div>
                 <div id="controls">
                     <button class="control-button" id="back-button">
-                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" >
+                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%">
                             <path fill="#b3b3b3" d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-.7.7H1.7a.7.7 0 0 1-.7-.7V1.7a.7.7 0 0 1 .7-.7h1.6z"></path>
                         </svg>
                     </button>
                     <button class="play-button" id="play-button"></button>
                     <button class="control-button" id="next-button">         
-                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" >
+                        <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%">
                             <path fill="#b3b3b3" d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 .7.7h1.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-1.6z"></path>
                         </svg>
                     </button>
@@ -162,9 +175,9 @@ class SpotifyWebPlayer extends HTMLElement {
             </div>
         `;
 
-        
+
         this.shadowRoot.getElementById("play-button").replaceChildren(this.playIcon);
-      
+
 
 
         // Attach event listeners to the buttons
@@ -174,21 +187,22 @@ class SpotifyWebPlayer extends HTMLElement {
 
 
 
-        this.progress = this.shadowRoot.getElementById("track-progress");
+        this.progress = this.shadowRoot.getElementById("track-progress-input");
+        this.currentTimeLabel = this.shadowRoot.getElementById("current-time");
+        this.maxTimeLabel = this.shadowRoot.getElementById("max-time");
         this.interval = setInterval(() => this.updateProgressBar(100), 100);
 
         var self = this
-        this.shadowRoot.getElementById('track-progress').addEventListener('click', function (e) {
-            var x = e.pageX - this.offsetLeft; // or e.offsetX (less support, though)
-            var clickedValue = this.getValue();
-            console.log(clickedValue)
-            self.seekToPosition(parseInt(clickedValue));
-        });
-        this.shadowRoot.getElementById("track-progress").addEventListener('click', function (e) {
-            self.setVolume(this.value / 100)
-            self.seekToPosition(parseInt(clickedValue));
+        this.shadowRoot.getElementById('track-progress-input').addEventListener('click', function (e) {
+            console.log(this)
+            console.log(this.value)
+            console.log(this.max)
+            console.log(this.min)
+            console.log(this.value)
 
+            self.seekToPosition(parseInt(this.value));
         });
+
         this.shadowRoot.getElementById("volume-input").addEventListener('click', function (e) {
             self.setVolume(this.value / 100)
         });
@@ -230,15 +244,30 @@ class SpotifyWebPlayer extends HTMLElement {
     updateProgressBar(progressInMs) {
         if (!this.paused) {
             const currentValue = this.progress.value;
-            this.progress.value = currentValue + progressInMs;
+            this.progress.value = Number(currentValue) + Number(progressInMs);
+            
+            this.currentTimeLabel.textContent = this.formatTime(Number(currentValue) + Number(progressInMs))
         }
     }
 
     updateTrackProgress(duration, position) {
         this.progress.value = position
         this.progress.max = duration
+        this.currentTimeLabel.textContent = this.formatTime(position)
+        this.maxTimeLabel.textContent = this.formatTime(duration)
     }
-
+    
+    formatTime(milliseconds) {
+        // Calculate minutes and seconds
+        const minutes = Math.floor(milliseconds / 60000);
+        const seconds = Math.floor((milliseconds % 60000) / 1000);
+      
+        // Pad single-digit seconds with a leading zero
+        const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+      
+        return `${minutes}:${formattedSeconds}`;
+      }
+      
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "accesstoken") {

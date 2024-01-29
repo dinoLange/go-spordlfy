@@ -13,10 +13,16 @@ const sessionContext = "session"
 
 func (s *Server) RegisterRoutes() http.Handler {
 	e := echo.New()
-	e.Static("/static", "internal/static")
+
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	// for dev use only
+	e.Use(s.noCacheMiddleWare)
 	e.Use(s.checkSessionMiddleware)
+
+	e.Static("/static", "internal/static")
+
 	e.GET("/callback", s.CallbackHandler)
 	e.GET("/login", LoginHandler)
 

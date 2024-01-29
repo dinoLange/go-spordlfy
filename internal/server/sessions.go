@@ -10,6 +10,15 @@ import (
 	"github.com/labstack/echo"
 )
 
+func (s *Server) noCacheMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Add("Cache-Control", "no-cache")
+		fmt.Println("no cache")
+		fmt.Println(c)
+		return next(c)
+	}
+}
+
 func (s *Server) checkSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if c.Path() == "/callback" || c.Path() == "/login" {

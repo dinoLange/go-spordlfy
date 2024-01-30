@@ -286,8 +286,8 @@ class SpotifyWebPlayer extends HTMLElement {
             this.progress.dispatchEvent(new Event("input"));
             this.volume.dispatchEvent(new Event("input"));
             this.player.addListener("ready", ({ device_id }) => {
-                // autoselect this device?
-                htmx.trigger("#devices", "spotify-sdk-finished");
+                this.dispatchEvent(new CustomEvent("player-ready", { detail: device_id }));
+
                 this.player.getVolume().then(volume => {
                     let volume_percentage = volume * 100;
                     this.volume.value = volume_percentage;

@@ -1,8 +1,5 @@
 package view
 
-
-
-
 templ Main(accessToken string) {
 	<html>
 		<head>
@@ -12,8 +9,15 @@ templ Main(accessToken string) {
 			<script src="http://localhost:4200/static/js/player.js"></script>
 		</head>
 		<body>
+			<script>		
+				document.addEventListener("DOMContentLoaded", function() {
+				 	document.getElementById("player").addEventListener("player-ready", (e) => {
+						console.log(`Device id is ${e.detail}`);
+					});
+				});
+			</script>
 			<h3>Gotify</h3>
-			<spotify-web-player accesstoken={ accessToken }></spotify-web-player>
+			<spotify-web-player id="player" accesstoken={ accessToken }></spotify-web-player>
 			<div id="devices" hx-get="/devices" hx-trigger="spotify-sdk-finished from:body" hx-target="this"></div>
 			<form hx-post="/search" hx-target="#searchResult">
 				<input type="text" name="term"/>

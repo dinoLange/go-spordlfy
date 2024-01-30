@@ -2,6 +2,7 @@ class SpotifyWebPlayer extends HTMLElement {
     player
     paused = true
     progress
+    volume
     accesstoken
     static observedAttributes = ["accesstoken"];
 
@@ -29,69 +30,34 @@ class SpotifyWebPlayer extends HTMLElement {
                 }
 
                 input[type="range"] {
-                    overflow: hidden;
                     -webkit-appearance: none;
                     width: 80%;
-                    height: 6px;
+                    height: 7px;
                     background: #535353;
                     outline: none;
                     opacity: 0.7;
                     -webkit-transition: .2s;
                     transition: opacity .2s;
+                    border-radius: 15px;
                 }
         
                 input[type="range"]:hover {
-                    opacity: 1;
-                }
-
+                    opacity: 1; 
+                    cursor: pointer;
+                }                  
                 
+                input[type="range"]:hover::-webkit-slider-thumb{
+                    height: 12px;
+                    width: 12px;
+                    border-radius: 50%;
+                }
         
                 input[type="range"]::-webkit-slider-thumb {
                     -webkit-appearance: none;
                     appearance: none;
-                    width: 16px;
-                    height: 16px;
-                    background: #1DB954;
-                    cursor: pointer;
-                    box-shadow: -80px 0 0 80px #1DB954;
-
+                    background: #FFFFFF;
                 }
-        
-                input[type="range"]::-moz-range-thumb {
-                    width: 16px;
-                    height: 16px;
-                    background: #1DB954;
-                    cursor: pointer;
-                }
-        
-                input[type="range"]::-webkit-slider-thumb:hover {
-                    background: #1DB954;
-                }
-        
-                input[type="range"]::-moz-range-thumb:hover {
-                    background: #1DB954;
-                }
-        
-
-                progress {
-                    width: 100%;
-                    height: 10px;
-                    margin-top: 20px;
-                    appearance: none;
-                    background-color: #535353;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-        
-                progress::-webkit-progress-bar {
-                    background-color: #535353;
-                    border-radius: 5px;
-                }
-            
-                progress::-webkit-progress-value {
-                    background-color: #1DB954;
-                    border-radius: 5px;
-                }
+          
           
                 #spotify-container {
                     background-color: #222326;
@@ -115,19 +81,27 @@ class SpotifyWebPlayer extends HTMLElement {
           
                 #controls {
                     display: flex;
-                    justify-content: space-between;
+                    justify-content: center;
+                    gap: 20px;
                     margin-top: 10px;
-                }        
+                } 
 
                 #progress {
                     display: flex;
                     justify-content: space-between;
                     font-size: 12px;
                     align-items: center;
+                    gap: 3px;
                 }
 
                 #volume-input {
                     margin-top: 10px;
+                }
+
+                #volume-input::-webkit-slider-thumb{
+                    height: 12px;
+                    width: 12px;
+                    border-radius: 50%;
                 }
           
                 .play-button {
@@ -170,43 +144,45 @@ class SpotifyWebPlayer extends HTMLElement {
                     </button>
                 </div>
 
-                <input id="volume-input" type="range" id="volumeControl" min="0" max="100" value="50">
+                <input id="volume-input" type="range" id="volumeControl" min="0" max="100" value="100">
 
             </div>
         `;
 
+        this.progress = this.shadowRoot.getElementById("track-progress-input");
+        this.volume = this.shadowRoot.getElementById("volume-input");
+
+        //style input elements
+        this.progress.addEventListener("input", function(event) {
+            const progress = (event.target.value / this.max) * 100;
+            this.style.background = `linear-gradient(to right, #1DB954 ${progress}%, #ccc ${progress}%)`;
+        });
+        this.volume.addEventListener('input',  function(event) {
+            const progress = (event.target.value / this.max) * 100;
+            this.style.background = `linear-gradient(to right, #1DB954 ${progress}%, #ccc ${progress}%)`;
+        });     
+
+        self = this;
+        this.progress.addEventListener("click", (event) => {
+            self.seekToPosition(parseInt(event.target.value));
+        });   
+        this.volume.addEventListener('click',  (event) => {
+            self.setVolume(event.target.value / 100)
+        });
+
 
         this.shadowRoot.getElementById("play-button").replaceChildren(this.playIcon);
-
-
 
         // Attach event listeners to the buttons
         this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handlePreviousTrack());
         this.shadowRoot.getElementById("play-button").addEventListener('click', () => this.handleTogglePlay());
         this.shadowRoot.getElementById("next-button").addEventListener('click', () => this.handleNextTrack());
 
-
-
-        this.progress = this.shadowRoot.getElementById("track-progress-input");
         this.currentTimeLabel = this.shadowRoot.getElementById("current-time");
         this.maxTimeLabel = this.shadowRoot.getElementById("max-time");
         this.interval = setInterval(() => this.updateProgressBar(100), 100);
-
-        var self = this
-        this.shadowRoot.getElementById('track-progress-input').addEventListener('click', function (e) {
-            console.log(this)
-            console.log(this.value)
-            console.log(this.max)
-            console.log(this.min)
-            console.log(this.value)
-
-            self.seekToPosition(parseInt(this.value));
-        });
-
-        this.shadowRoot.getElementById("volume-input").addEventListener('click', function (e) {
-            self.setVolume(this.value / 100)
-        });
     }
+
 
 
     createElementFromHTML(htmlString) {
@@ -245,8 +221,8 @@ class SpotifyWebPlayer extends HTMLElement {
         if (!this.paused) {
             const currentValue = this.progress.value;
             this.progress.value = Number(currentValue) + Number(progressInMs);
-            
             this.currentTimeLabel.textContent = this.formatTime(Number(currentValue) + Number(progressInMs))
+            this.progress.dispatchEvent(new Event("input"))
         }
     }
 
@@ -255,19 +231,20 @@ class SpotifyWebPlayer extends HTMLElement {
         this.progress.max = duration
         this.currentTimeLabel.textContent = this.formatTime(position)
         this.maxTimeLabel.textContent = this.formatTime(duration)
+        this.progress.dispatchEvent(new Event("input"))
     }
-    
+
     formatTime(milliseconds) {
         // Calculate minutes and seconds
         const minutes = Math.floor(milliseconds / 60000);
         const seconds = Math.floor((milliseconds % 60000) / 1000);
-      
+
         // Pad single-digit seconds with a leading zero
         const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
-      
+
         return `${minutes}:${formattedSeconds}`;
-      }
-      
+    }
+
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "accesstoken") {
@@ -306,8 +283,16 @@ class SpotifyWebPlayer extends HTMLElement {
                 volume: 0.5
             });
             this.player.connect();
+            this.progress.dispatchEvent(new Event("input"));
+            this.volume.dispatchEvent(new Event("input"));
             this.player.addListener("ready", ({ device_id }) => {
+                // autoselect this device?
                 htmx.trigger("#devices", "spotify-sdk-finished");
+                this.player.getVolume().then(volume => {
+                    let volume_percentage = volume * 100;
+                    this.volume.value = volume_percentage;
+                    this.volume.dispatchEvent(new Event("input"))
+                  });
             });
 
             this.player.addListener("not_ready", ({ device_id }) => {

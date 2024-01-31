@@ -18,6 +18,8 @@ templ Main(accessToken string) {
 			</script>
 			<h3>Gotify</h3>
 			<spotify-web-player id="player" accesstoken={ accessToken }></spotify-web-player>
+			<button hx-get="/playlists" hx-target="#playlists">Load Playlists</button>
+			<div id="playlists"></div>
 			<form hx-post="/search" hx-target="#searchResult">
 				<input type="text" name="term"/>
 				<button>Search</button>

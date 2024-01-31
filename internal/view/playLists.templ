@@ -1,0 +1,18 @@
+package view
+
+import "go-spordlfy/internal/models"
+
+
+templ PlayLists(playLists models.PlayLists) {
+	<div>
+        <p>Playlists</p>
+        		<ul>
+              for _, playList := range playLists.Items {
+                <li>
+                <img src={playList.Images[0].URL} alt="Trulli" width="30" height="20"></img> { playList.Name } <button hx-get={"/play?uri=" + playList.URI}>Play</button>
+                </li>
+              }
+            </ul>
+	</div>
+	
+}

@@ -57,16 +57,9 @@ func Main(accessToken string) templ.Component {
 		templ_7745c5c3_Var5 := `		
 				document.addEventListener("DOMContentLoaded", function() {
 				 	document.getElementById("player").addEventListener("player-ready", (e) => {
-						// document.body.addEventListener("htmx:configRequest", (configRequestEvent) => {
-						// 	if (configRequestEvent.detail.path == "/devices") {
-						// 		configRequestEvent.detail.parameters["device_id"] = e.detail; 
-						// 	}					
-						// });
 						fetch("/setDevice?id="+e.detail)
-						// document.getElementById("devices").dispatchEvent(new CustomEvent("loadDevices"));
 					});
 				});
-
 			`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -89,12 +82,21 @@ func Main(accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></spotify-web-player><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></spotify-web-player> <button hx-get=\"/playlists\" hx-target=\"#playlists\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var7 := `Search`
+		templ_7745c5c3_Var7 := `Load Playlists`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><div id=\"playlists\"></div><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var8 := `Search`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

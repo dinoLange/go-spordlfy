@@ -52,6 +52,27 @@ func Search(accessToken string, searchTerm string) (*models.SearchResponse, erro
 	return &searchResponse, nil
 }
 
+func PlayLists(accessToken string) (*models.PlayLists, error) {
+	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/playlists", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var searchResponse models.PlayLists
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	json.Unmarshal(body, &searchResponse)
+	return &searchResponse, nil
+}
+
 func Play(session *models.UserSession, uri string) error {
 
 	data := map[string]interface{}{

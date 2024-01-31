@@ -23,14 +23,15 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	e.Static("/static", "internal/static")
 
+	e.GET("/", MainHandler)
 	e.GET("/callback", s.CallbackHandler)
 	e.GET("/login", LoginHandler)
-
-	e.GET("/", MainHandler)
 
 	e.GET("/setDevice", s.DevicesHandler)
 
 	e.POST("/search", SearchHandler)
+	e.GET("/playlists", PlayListsHandler)
+
 	e.GET("/play", PlayHandler)
 
 	return e
@@ -78,7 +79,21 @@ func SearchHandler(c echo.Context) error {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
 
-	return view.SearchResultView(*searchResponse).Render(c.Request().Context(), c.Response().Writer)
+	return view.SearchResult(*searchResponse).Render(c.Request().Context(), c.Response().Writer)
+}
+
+func PlayListsHandler(c echo.Context) error {
+	session, ok := c.Get(sessionContext).(*models.UserSession)
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+	}
+
+	playLists, err := PlayLists(session.AccessToken)
+	if err != nil {
+		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+	}
+
+	return view.PlayLists(*playLists).Render(c.Request().Context(), c.Response().Writer)
 }
 
 func PlayHandler(c echo.Context) error {

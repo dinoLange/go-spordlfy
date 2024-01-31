@@ -18,16 +18,7 @@ class SpotifyWebPlayer extends HTMLElement {
         // Create the two inner buttons
         this.shadowRoot.innerHTML = `
             <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    background-color: #121212;
-                    color: #ffffff;
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
+
 
                 input[type="range"] {
                     -webkit-appearance: none;
@@ -318,6 +309,7 @@ class SpotifyWebPlayer extends HTMLElement {
                 track_window: { current_track }
             }) => {
                 this.changeTrackLabels(current_track.name, current_track.artists[0].name);
+                //this.changeImage(current_track.album.images[0].url)
                 this.togglePlayContent(paused)
                 this.updateTrackProgress(duration, position)
             });

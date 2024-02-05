@@ -24,3 +24,6 @@ tmp/
 
 # .env file
 .env
+.env.example
+
+.air.toml

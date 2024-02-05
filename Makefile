@@ -10,6 +10,7 @@ build:
 # Run the application
 run:
 	@templ generate
+	@npx tailwindcss -o ./internal/static/css/output.css
 	@go run main.go
 
 generate:

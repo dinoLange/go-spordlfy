@@ -4,15 +4,15 @@ import "go-spordlfy/internal/models"
 
 
 templ PlayLists(playLists models.PlayLists) {
-	<div>
-        <p>Playlists</p>
-        		<ul>
-              for _, playList := range playLists.Items {
-                <li>
-                <img src={playList.Images[0].URL} alt="Trulli" width="30" height="20"></img> { playList.Name } <button hx-get={"/play?uri=" + playList.URI}>Play</button>
-                </li>
-              }
-            </ul>
-	</div>
-	
+      <h3 class="m-2">My Playlists</h3>
+      <ul>
+        for _, playList := range playLists.Items {
+          <li>
+            <div hx-get={"/play?uri=" + playList.URI} class="flex cursor-pointer m-2">
+              <img src={playList.Images[0].URL} alt="Trulli" class="rounded-md size-10 mr-2"></img> 
+              <div >{ playList.Name }</div>
+            </div>
+          </li>
+        }
+      </ul>	
 }

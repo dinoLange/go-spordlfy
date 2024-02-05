@@ -3,12 +3,12 @@ package view
 templ Main(accessToken string) {
 	<html>
 		<head>
-			<link href="https://unpkg.com/water.css@2/out/dark.css" rel="stylesheet"/>
-			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		  	<link href="http://localhost:4200/static/css/output.css" rel="stylesheet"></link>
+  			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<script src="https://sdk.scdn.co/spotify-player.js"></script>
 			<script src="http://localhost:4200/static/js/player.js"></script>
 		</head>
-		<body>
+		<body class="overflow-hidden bg-neutral-900">
 			<script>		
 				document.addEventListener("DOMContentLoaded", function() {
 				 	document.getElementById("player").addEventListener("player-ready", (e) => {
@@ -16,15 +16,25 @@ templ Main(accessToken string) {
 					});
 				});
 			</script>
-			<h3>Gotify</h3>
-			<spotify-web-player id="player" accesstoken={ accessToken }></spotify-web-player>
-			<button hx-get="/playlists" hx-target="#playlists">Load Playlists</button>
-			<div id="playlists"></div>
-			<form hx-post="/search" hx-target="#searchResult">
-				<input type="text" name="term"/>
-				<button>Search</button>
-			</form>
-			<div id="searchResult"></div>
+			<div class="flex h-screen overflow-hidden" >
+				<div class="flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white">
+					<div hx-get="/playlists" hx-trigger="load" id="playlists"></div>
+				</div>
+
+				<div class="flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white" >
+					<form hx-post="/search" hx-target="#searchResult">
+							<input type="text" name="term"/>
+							<button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Search</button>
+					</form>
+					<div id="searchResult"></div>
+				</div>
+			</div>
+
+			<div class="fixed bottom-0 w-full h-20 bg-neutral-900">
+				<spotify-web-player id="player" accesstoken={ accessToken }></spotify-web-player>
+			</div>
+
 		</body>
+		
 	</html>
 }

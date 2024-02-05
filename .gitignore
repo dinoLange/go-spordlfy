@@ -27,3 +27,5 @@ tmp/
 .env.example
 
 .air.toml
+
+/

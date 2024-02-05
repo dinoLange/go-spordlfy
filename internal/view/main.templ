@@ -22,10 +22,7 @@ templ Main(accessToken string) {
 				</div>
 
 				<div class="flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white" >
-					<form hx-post="/search" hx-target="#searchResult">
-							<input type="text" name="term"/>
-							<button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Search</button>
-					</form>
+					<input type="text" name="search" hx-post="/search" hx-target="#searchResult" hx-trigger="input changed delay:500ms, search" class="text-black m-2"></input>
 					<div id="searchResult"></div>
 				</div>
 			</div>

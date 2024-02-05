@@ -73,7 +73,7 @@ func SearchHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
 	}
 
-	searchTerm := c.FormValue("term")
+	searchTerm := c.FormValue("search")
 	searchResponse, err := Search(session.AccessToken, searchTerm)
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)

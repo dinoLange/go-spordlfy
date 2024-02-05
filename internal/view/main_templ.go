@@ -65,16 +65,7 @@ func Main(accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><div class=\"flex h-screen overflow-hidden\"><div class=\"flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white\"><div hx-get=\"/playlists\" hx-trigger=\"load\" id=\"playlists\"></div></div><div class=\"flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white\"><form hx-post=\"/search\" hx-target=\"#searchResult\"><input type=\"text\" name=\"term\"> <button class=\"bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var6 := `Search`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form><div id=\"searchResult\"></div></div></div><div class=\"fixed bottom-0 w-full h-20 bg-neutral-900\"><spotify-web-player id=\"player\" accesstoken=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><div class=\"flex h-screen overflow-hidden\"><div class=\"flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white\"><div hx-get=\"/playlists\" hx-trigger=\"load\" id=\"playlists\"></div></div><div class=\"flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white\"><input type=\"text\" name=\"search\" hx-post=\"/search\" hx-target=\"#searchResult\" hx-trigger=\"input changed delay:500ms, search\" class=\"text-black m-2\"><div id=\"searchResult\"></div></div></div><div class=\"fixed bottom-0 w-full h-20 bg-neutral-900\"><spotify-web-player id=\"player\" accesstoken=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -65,7 +65,7 @@ func Main(accessToken string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><div class=\"flex h-screen overflow-hidden\"><div class=\"flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white\"><div hx-get=\"/playlists\" hx-trigger=\"load\" id=\"playlists\"></div></div><div class=\"flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white\"><input type=\"text\" name=\"search\" hx-post=\"/search\" hx-target=\"#searchResult\" hx-trigger=\"input changed delay:500ms, search\" class=\"text-black m-2\"><div id=\"searchResult\"></div></div></div><div class=\"fixed bottom-0 w-full h-20 bg-neutral-900\"><spotify-web-player id=\"player\" accesstoken=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script><div class=\"flex h-screen overflow-hidden\"><div class=\"flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white\"><div hx-get=\"/playlists\" hx-trigger=\"load\" id=\"playlists\"></div></div><div class=\"flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white\"><input type=\"text\" name=\"search\" hx-post=\"/search\" hx-target=\"#searchResult\" hx-trigger=\"input changed delay:500ms, search\" class=\"text-black m-2\"><div id=\"searchResult\"></div></div></div><div class=\"fixed bottom-0 w-full h-200 bg-neutral-900\"><spotify-web-player id=\"player\" accesstoken=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

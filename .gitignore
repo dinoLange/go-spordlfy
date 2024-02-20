@@ -28,4 +28,7 @@ tmp/
 
 .air.toml
 
-/
+main.db
+
+*_templ.go
+

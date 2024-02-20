@@ -73,14 +73,16 @@ func PlayLists(accessToken string) (*models.PlayLists, error) {
 	return &searchResponse, nil
 }
 
-func Play(session *models.UserSession, uri string) error {
+func Play(session *models.UserSession, uri string, offset string) error {
 
 	data := map[string]interface{}{
 		"context_uri": uri,
-		"offset": map[string]interface{}{
-			"position": 5,
-		},
 		"position_ms": 0,
+	}
+	if len(offset) > 0 {
+		data["offset"] = map[string]interface{}{
+			"uri": offset,
+		}
 	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {

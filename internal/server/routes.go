@@ -103,11 +103,11 @@ func PlayHandler(c echo.Context) error {
 	}
 
 	uri := c.QueryParam("uri")
-	err := Play(session, uri)
+	offset := c.QueryParam("offset")
+	err := Play(session, uri, offset)
 	if err != nil {
 		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 	}
 
-	return c.String(http.StatusNoContent, "played "+uri)
-
+	return c.String(http.StatusNoContent, "Played "+uri)
 }

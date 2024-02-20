@@ -9,7 +9,7 @@ templ Main(accessToken string) {
 			<script src="https://sdk.scdn.co/spotify-player.js"></script>
 			<script src="http://localhost:4200/static/js/player.js"></script>
 		</head>
-		<body class="overflow-hidden bg-neutral-900">
+		<body class="overflow-hidden bg-neutral-700">
 			<script>		
 				document.addEventListener("DOMContentLoaded", function() {
 				 	document.getElementById("player").addEventListener("player-ready", (e) => {
@@ -22,8 +22,9 @@ templ Main(accessToken string) {
 					<div hx-get="/playlists" hx-trigger="load" id="playlists"></div>
 				</div>
 
-				<div class="flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white" >
-					<input type="text" name="search" hx-post="/search" hx-target="#searchResult" hx-trigger="input changed delay:500ms, search" class="text-black m-2"></input>
+				<div class="flex-shrink-0 w-2/3 overflow-y-auto bg-neutral-700 text-white m-2"  >
+						<input class="bg-neutral-900 h-10 px-5 pr-16 rounded-full text-sm focus:outline-none"
+							type="text" name="search" hx-post="/search" hx-target="#searchResult" hx-trigger="input changed delay:500ms, search" placeholder="Search"/>
 					<div id="searchResult"></div>
 				</div>
 			</div>

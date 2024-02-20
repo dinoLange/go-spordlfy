@@ -3,30 +3,34 @@ package view
 import "go-spordlfy/internal/models"
 
 templ SearchResult(searchReponse models.SearchResponse) {
-	<div>
-        <p>Album</p>
-		<ul>
-			for _, album := range searchReponse.Albums.Items {
-				<li>
-					<div hx-get={"/play?uri=" + album.URI} class="flex cursor-pointer m-2">
-						<img src={album.Images[0].URL} class="rounded-md size-10 mr-2"></img> 
-						{ album.Name } 
-					</div>
-				</li>
-			}
-		</ul>
-	</div>
-	<div>
-        // <p>Track</p>
-		// <ul>
-		// 	for _, track := range searchReponse.Tracks.Items {
-		// 		<li>
-		// 			<div hx-get={"/play?uri=" + track.URI} class="flex cursor-pointer m-2">
-		// 				<img src={track.Album.Images[0].URL} class="rounded-md size-10 mr-2"></img> 
-		// 				{ track.Name } 
-		// 			</div>
-		// 		</li>
-		// 	}
-		// </ul>
-	</div>
+	if len(searchReponse.Albums.Items) > 0 {
+		<div>
+			<p>Album</p>
+			<ul>
+				for _, album := range searchReponse.Albums.Items[0:5] {
+					<li>
+						<div hx-get={ "/play?uri=" + album.URI } class="flex cursor-pointer m-2">
+							<img src={ album.Images[0].URL } class="rounded-md size-10 mr-2"/>
+							{ album.Name }
+						</div>
+					</li>
+				}
+			</ul>
+		</div>
+	}
+	if len(searchReponse.Tracks.Items) > 0 {
+		<div>
+			<p>Track</p>
+			<ul>
+				for _, track := range searchReponse.Tracks.Items[0:5] {
+					<li>
+						<div hx-get={ "/play?uri=" + track.Album.URI + "&offset="+ track.URI} class="flex cursor-pointer m-2">
+							<img src={ track.Album.Images[0].URL } class="rounded-md size-10 mr-2"/>
+							{ track.Name }
+						</div>
+					</li>
+				}
+			</ul>
+		</div>
+	}
 }

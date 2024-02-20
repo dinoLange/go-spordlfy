@@ -5,6 +5,7 @@ import (
 	"go-spordlfy/internal/models"
 	"go-spordlfy/internal/view"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo"
@@ -21,7 +22,7 @@ func (s *Server) noCacheMiddleWare(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (s *Server) checkSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if c.Path() == "/callback" || c.Path() == "/login" {
+		if c.Path() == "/callback" || c.Path() == "/login" || strings.HasPrefix(c.Path(), "/static") {
 			return next(c)
 		}
 		session, err := s.getUserSession(c)

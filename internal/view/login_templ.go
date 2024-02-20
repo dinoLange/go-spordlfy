@@ -10,15 +10,12 @@ import "context"
 import "io"
 import "bytes"
 
-func activateButton(loginLink string) templ.ComponentScript {
+func gotoLoginLink(loginLink string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_activateButton_d329`,
-		Function: `function __templ_activateButton_d329(loginLink){var link = loginLink
-	document.getElementById("loginButton").addEventListener("click", function() {
-          window.location.href = link
-        });}`,
-		Call:       templ.SafeScript(`__templ_activateButton_d329`, loginLink),
-		CallInline: templ.SafeScriptInline(`__templ_activateButton_d329`, loginLink),
+		Name:       `__templ_gotoLoginLink_4f8e`,
+		Function:   `function __templ_gotoLoginLink_4f8e(loginLink){window.location.href = loginLink}`,
+		Call:       templ.SafeScript(`__templ_gotoLoginLink_4f8e`, loginLink),
+		CallInline: templ.SafeScriptInline(`__templ_gotoLoginLink_4f8e`, loginLink),
 	}
 }
 
@@ -35,24 +32,24 @@ func Login(loginLink string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><link href=\"https://unpkg.com/water.css@2/out/dark.css\" rel=\"stylesheet\"></head>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><link href=\"http://localhost:4200/static/css/output.css\" rel=\"stylesheet\"></head><body class=\"flex justify-center items-center h-screen bg-gray-100\"><div class=\"bg-neutral-00\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, activateButton(loginLink))
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, gotoLoginLink(loginLink))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body onload=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 templ.ComponentScript = activateButton(loginLink)
+		var templ_7745c5c3_Var2 templ.ComponentScript = gotoLoginLink(loginLink)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button id=\"loginButton\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +58,7 @@ func Login(loginLink string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

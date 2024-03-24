@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo"
 )
 
 var clientId = os.Getenv("SPOTIFY_CLIENT_ID")
@@ -110,22 +109,21 @@ func (s *Server) RefreshAccessToken(session *models.UserSession) error {
 	return nil
 }
 
-func LoginHandler(c echo.Context) error {
-	return view.Login(buildSpotifyURL()).Render(c.Request().Context(), c.Response().Writer)
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	view.Login(buildSpotifyURL()).Render(r.Context(), w)
 }
 
-func (s *Server) CallbackHandler(c echo.Context) error {
-	code := c.QueryParam("code")
-	//state := c.QueryParam("state")
+func (s *Server) CallbackHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
 
 	data := setAuthTokenQueryParams(code, "http://localhost:4200/callback")
 	req, err := http.NewRequest("POST", "https://accounts.spotify.com/api/token", strings.NewReader(data.Encode()))
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if len(clientId) < 1 || len(clientSecret) < 1 {
-		http.Error(c.Response().Writer, "ClientId or ClientSecret not provide in env", http.StatusInternalServerError)
+		http.Error(w, "ClientId or ClientSecret not provide in env", http.StatusInternalServerError)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(clientId+":"+clientSecret)))
@@ -134,7 +132,7 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	defer func() {
@@ -147,17 +145,17 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	if resp.StatusCode != 200 {
-		http.Error(c.Response().Writer, fmt.Sprintf("spotify: got %d status code: %s", resp.StatusCode, body), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("spotify: got %d status code: %s", resp.StatusCode, body), http.StatusInternalServerError)
 	}
 	var response TokenResponse
 	err = json.Unmarshal([]byte(string(body)), &response)
 
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	userSession := models.UserSession{
@@ -175,9 +173,8 @@ func (s *Server) CallbackHandler(c echo.Context) error {
 	cookie.Name = "session_id"
 	cookie.Value = userSession.SessionID
 	cookie.Expires = userSession.ExpiryTime
-	c.SetCookie(cookie)
-
-	return c.Redirect(http.StatusSeeOther, "/")
+	http.SetCookie(w, cookie)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func setAuthTokenQueryParams(authCode string, redirectURI string) url.Values {

@@ -4,110 +4,141 @@ import (
 	"go-spordlfy/internal/models"
 	"go-spordlfy/internal/view"
 	"net/http"
-
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 const sessionContext = "session"
 
+type Middleware func(http.Handler) http.Handler
+
+// App struct to hold our routes and middleware
+type App struct {
+	mux         *http.ServeMux
+	middlewares []Middleware
+}
+
+// Use adds middleware to the chain
+func (a *App) Use(mw Middleware) {
+	a.middlewares = append(a.middlewares, mw)
+}
+
+// NewApp creates and returns a new App with an initialized ServeMux and middleware slice
+func NewApp() *App {
+	return &App{
+		mux:         http.NewServeMux(),
+		middlewares: []Middleware{},
+	}
+}
+
+// Handle registers a handler for a specific route, applying all middleware
+func (a *App) Handle(pattern string, handler http.Handler) {
+	finalHandler := handler
+	for _, middleware := range a.middlewares {
+		finalHandler = middleware(finalHandler)
+	}
+	a.mux.Handle(pattern, finalHandler)
+}
+
+// ListenAndServe starts the application server
+func (a *App) ListenAndServe(address string) error {
+	return http.ListenAndServe(address, a.mux)
+}
+
 func (s *Server) RegisterRoutes() http.Handler {
-	e := echo.New()
+	app := NewApp()
+	app.Use(LoggingMiddleware)
+	app.Use(s.SessionMiddleware)
+	// TODO: dev flag
+	app.Use(noCacheMiddleWare)
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	app.Handle("GET /", http.HandlerFunc(MainHandler))
+	app.Handle("GET /callback", http.HandlerFunc(s.CallbackHandler))
 
-	// for dev use only
-	e.Use(s.noCacheMiddleWare)
-	e.Use(s.checkSessionMiddleware)
+	app.Handle("GET /static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/static"))))
 
-	e.Static("/static", "internal/static")
+	app.Handle("GET /login", http.HandlerFunc(LoginHandler))
 
-	e.GET("/", MainHandler)
-	e.GET("/callback", s.CallbackHandler)
-	e.GET("/login", LoginHandler)
+	app.Handle("GET /setDevice", http.HandlerFunc(s.DevicesHandler))
 
-	e.GET("/setDevice", s.DevicesHandler)
+	app.Handle("POST /search", http.HandlerFunc(SearchHandler))
+	app.Handle("GET /playlists", http.HandlerFunc(PlayListsHandler))
 
-	e.POST("/search", SearchHandler)
-	e.GET("/playlists", PlayListsHandler)
+	app.Handle("GET /play", http.HandlerFunc(PlayHandler))
 
-	e.GET("/play", PlayHandler)
-
-	return e
+	return app.mux
 }
 
-func MainHandler(c echo.Context) error {
-	session, ok := c.Get(sessionContext).(*models.UserSession)
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
-	}
-	return view.Main(session.AccessToken).Render(c.Request().Context(), c.Response().Writer)
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(sessionContext).(*models.UserSession)
+	view.Main(session.AccessToken).Render(r.Context(), w)
 }
 
-func (s *Server) DevicesHandler(c echo.Context) error {
-	session, ok := c.Get(sessionContext).(*models.UserSession)
+func (s *Server) DevicesHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
-	deviceId := c.QueryParam("id")
+	deviceId := r.URL.Query().Get("id")
+
 	if len(deviceId) == 0 {
-		http.Error(c.Response().Writer, "device id required", http.StatusBadRequest)
+		http.Error(w, "device id required", http.StatusBadRequest)
 	}
 	devices, err := Devices(session.AccessToken)
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	for _, device := range devices.Devices {
 		if device.ID == deviceId {
 			s.db.UpdateDevice(session.ID, device.ID)
-			return c.String(http.StatusOK, "set device "+deviceId)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Device set to " + device.Name))
+			return
 		}
 	}
-	return echo.NewHTTPError(http.StatusInternalServerError, "Device id not found")
+	http.Error(w, "device id not found", http.StatusInternalServerError)
 }
 
-func SearchHandler(c echo.Context) error {
-	session, ok := c.Get(sessionContext).(*models.UserSession)
+func SearchHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
 
-	searchTerm := c.FormValue("search")
+	searchTerm := r.FormValue("search")
 	searchResponse, err := Search(session.AccessToken, searchTerm)
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	return view.SearchResult(*searchResponse).Render(c.Request().Context(), c.Response().Writer)
+	view.SearchResult(*searchResponse).Render(r.Context(), w)
 }
 
-func PlayListsHandler(c echo.Context) error {
-	session, ok := c.Get(sessionContext).(*models.UserSession)
+func PlayListsHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
 
 	playLists, err := PlayLists(session.AccessToken)
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	return view.PlayLists(*playLists).Render(c.Request().Context(), c.Response().Writer)
+	view.PlayLists(*playLists).Render(r.Context(), w)
 }
 
-func PlayHandler(c echo.Context) error {
-	session, ok := c.Get(sessionContext).(*models.UserSession)
+func PlayHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
 	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get session information")
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
+	uri := r.URL.Query().Get("uri")
+	offset := r.URL.Query().Get("offset")
 
-	uri := c.QueryParam("uri")
-	offset := c.QueryParam("offset")
 	err := Play(session, uri, offset)
 	if err != nil {
-		http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	return c.String(http.StatusNoContent, "Played "+uri)
+	w.WriteHeader(http.StatusNoContent)
+	w.Write([]byte("Played " + uri))
 }

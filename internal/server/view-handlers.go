@@ -51,3 +51,17 @@ func PlayHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 	w.Write([]byte("Played " + uri))
 }
+
+func QueueHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	if !ok {
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
+	}
+
+	queue, err := Queue(session.AccessToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	view.Queue(queue).Render(r.Context(), w)
+}

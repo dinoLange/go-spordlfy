@@ -1,0 +1,29 @@
+package view
+
+import "go-spordlfy/internal/models"
+
+
+templ Queue(queue *models.Queue) {
+    
+    <h3 class="m-2">Queue</h3>
+    <ul>
+        
+        for _, q := range queue.Queue {
+            <li>
+                if queue.CurrentlyPlaying.ID == q.ID {
+                    <div class="flex cursor-pointer m-2 text-green-400">
+                        <img src={ q.Album.Images[0].URL } class="rounded-md size-5 mr-2"/>
+                        { q.Name }
+                    </div>
+                } else {
+                    <div hx-get={ "/play?uri=" + q.URI } class=" flex cursor-pointer m-2">
+                        <img src={ q.Album.Images[0].URL } class="rounded-md size-5 mr-2"/>
+                        { q.Name }
+                    </div>
+                }
+            </li>
+}
+    </ul>
+    
+
+}

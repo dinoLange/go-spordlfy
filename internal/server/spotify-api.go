@@ -7,6 +7,7 @@ import (
 	"go-spordlfy/internal/models"
 	"io"
 	"net/http"
+	"strings"
 )
 
 var client = &http.Client{}
@@ -73,12 +74,26 @@ func PlayLists(accessToken string) (*models.PlayLists, error) {
 	return &searchResponse, nil
 }
 
-func Play(session *models.UserSession, uri string, offset string) error {
-
-	data := map[string]interface{}{
-		"context_uri": uri,
-		"position_ms": 0,
+func getBody(uri string) map[string]interface{} {
+	if strings.Contains(uri, "spotify:track:") {
+		return map[string]interface{}{
+			"context_uri": nil,
+			"uris":        []string{uri},
+			"position_ms": 0,
+		}
+	} else {
+		return map[string]interface{}{
+			"context_uri": uri,
+			"uris":        nil,
+			"position_ms": 0,
+		}
 	}
+
+}
+
+func Play(session *models.UserSession, uri string, offset string) error {
+	data := getBody(uri)
+
 	if len(offset) > 0 {
 		data["offset"] = map[string]interface{}{
 			"uri": offset,
@@ -105,4 +120,26 @@ func Play(session *models.UserSession, uri string, offset string) error {
 		return fmt.Errorf("Play call got %d status code: %s", resp.StatusCode, resp.Body)
 	}
 	return nil
+}
+
+func Queue(accessToken string) (*models.Queue, error) {
+	req, err := http.NewRequest(http.MethodGet, "https://api.spotify.com/v1/me/player/queue", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+accessToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var queueResponse models.Queue
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	json.Unmarshal(body, &queueResponse)
+	return &queueResponse, nil
+
 }

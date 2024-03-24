@@ -6,7 +6,8 @@ class SpotifyWebPlayer extends HTMLElement {
     progressInputActive = false;
     mute = false
     lastVolume = 0
-
+    lastTrack = ""
+    
     //elements
     player
     progress
@@ -389,10 +390,14 @@ class SpotifyWebPlayer extends HTMLElement {
                 duration,
                 track_window: { current_track }
             }) => {
+                if (current_track.uid != this.lastTrack) {
+                    this.dispatchEvent(new Event("song-change"))
+                }
                 this.changeTrackLabels(current_track.name, current_track.artists[0].name);
                 this.changeImage(current_track.album.images[0].url)
                 this.togglePlayContent(paused)
                 this.updateTrackProgress(duration, position)
+                this.lastTrack = current_track.uid
             });
 
         };

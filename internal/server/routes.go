@@ -64,5 +64,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	app.Handle("GET /play", http.HandlerFunc(PlayHandler))
 
+	app.Handle("GET /queue", http.HandlerFunc(QueueHandler))
+
 	return app.mux
 }

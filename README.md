@@ -1,3 +1,11 @@
+# Projects TODOs:
+
+- add current queue as view 
+    - fix switch to song in queue (maybe put all queue uris in the play request???)
+- add Shuffle and Repeat buttons to player.js
+- podcasts
+- 
+
 # Project go-spordlfy
 
 One Paragraph of project description goes here

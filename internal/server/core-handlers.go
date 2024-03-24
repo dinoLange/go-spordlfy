@@ -192,3 +192,33 @@ func setRefreshTokenQueryParams(refreshToken string) url.Values {
 	data.Set("client_id", clientId)
 	return data
 }
+
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	session := r.Context().Value(sessionContext).(*models.UserSession)
+	view.Main(session.AccessToken).Render(r.Context(), w)
+}
+
+func (s *Server) DevicesHandler(w http.ResponseWriter, r *http.Request) {
+	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	if !ok {
+		http.Error(w, "failed to get session info", http.StatusInternalServerError)
+	}
+	deviceId := r.URL.Query().Get("id")
+
+	if len(deviceId) == 0 {
+		http.Error(w, "device id required", http.StatusBadRequest)
+	}
+	devices, err := Devices(session.AccessToken)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	for _, device := range devices.Devices {
+		if device.ID == deviceId {
+			s.db.UpdateDevice(session.ID, device.ID)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Device set to " + device.Name))
+			return
+		}
+	}
+	http.Error(w, "device id not found", http.StatusInternalServerError)
+}

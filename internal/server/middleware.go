@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"go-spordlfy/internal/models"
 	"log"
 	"net/http"
@@ -23,7 +24,8 @@ func (s *Server) SessionMiddleware(next http.Handler) http.Handler {
 		}
 		session, err := s.loadUserSession(r)
 		if err != nil {
-			http.Redirect(w, r, "http://localhost:4200/", http.StatusSeeOther)
+			fmt.Println("no session found")
+			next.ServeHTTP(w, r)
 			return
 		}
 		ctx := context.WithValue(r.Context(), "session", session)

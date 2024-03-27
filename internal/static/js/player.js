@@ -2,11 +2,22 @@ class SpotifyWebPlayer extends HTMLElement {
     accesstoken
     static observedAttributes = ["accesstoken"];
 
-    paused = true
+    device_id = "";
+
+    paused = true;
     progressInputActive = false;
-    mute = false
-    lastVolume = 0
-    lastTrack = ""
+    mute = false;
+    lastVolume = 0;
+    lastTrack = "";
+
+    RepeatMode = {
+        Off: "off",
+        Track: "track",
+        Context: "context",
+    };
+
+    shuffle_state = false;
+    repeat_state = this.RepeatMode.Off;
     
     //elements
     player
@@ -14,9 +25,12 @@ class SpotifyWebPlayer extends HTMLElement {
     volume
     volumeButton
 
-    playIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"></path></svg>')
-    pauseIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"></path></svg>')
+    playIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M3 1.713a.7.7 0 0 1 1.05-.607l10.89 6.288a.7.7 0 0 1 0 1.212L4.05 14.894A.7.7 0 0 1 3 14.288V1.713z"></path></svg>');
+    pauseIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%"><path d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"></path></svg>');
 
+    repeatOffIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="80%"><path if="repeat-path" fill="#b3b3b3" d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z"></path></svg>')
+    repeatTrackIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="80%"><path fill="#1DB954" d="M0 4.75A3.75 3.75 0 0 1 3.75 1h.75v1.5h-.75A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5zM12.25 2.5h-.75V1h.75A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25z"></path><path fill="#1DB954" d="M9.12 8V1H7.787c-.128.72-.76 1.293-1.787 1.313V3.36h1.57V8h1.55z"></path></svg>')
+    repeatContextIcon = this.createElementFromHTML('<svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="80%"><path if="repeat-path" fill="#1DB954" d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z"></path></svg>')
 
     constructor() {
         super();
@@ -70,7 +84,10 @@ class SpotifyWebPlayer extends HTMLElement {
 
                 #title-info {
                     margin-left: 5px;
-                    width: 100px;
+                    width: 200px;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                 }
 
                 #track-title {
@@ -161,6 +178,12 @@ class SpotifyWebPlayer extends HTMLElement {
                 </div>
                 <div id="song-control">
                     <div id="controls">
+                        <button class="control-button" id="shuffle-button">
+                            <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="80%"> 
+                                <path id="shuffle-path1" fill="#b3b3b3" d="M13.151.922a.75.75 0 1 0-1.06 1.06L13.109 3H11.16a3.75 3.75 0 0 0-2.873 1.34l-6.173 7.356A2.25 2.25 0 0 1 .39 12.5H0V14h.391a3.75 3.75 0 0 0 2.873-1.34l6.173-7.356a2.25 2.25 0 0 1 1.724-.804h1.947l-1.017 1.018a.75.75 0 0 0 1.06 1.06L15.98 3.75 13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 0 0 .39 3.5z"></path>
+                                <path id="shuffle-path2" fill="#b3b3b3" d="m7.5 10.723.98-1.167.957 1.14a2.25 2.25 0 0 0 1.724.804h1.947l-1.017-1.018a.75.75 0 1 1 1.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 1 1-1.06-1.06L13.109 13H11.16a3.75 3.75 0 0 1-2.873-1.34l-.787-.938z"></path>
+                            </svg>
+                        </button>
                         <button class="control-button" id="back-button">
                             <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%">
                                 <path fill="#b3b3b3" d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-.7.7H1.7a.7.7 0 0 1-.7-.7V1.7a.7.7 0 0 1 .7-.7h1.6z"></path>
@@ -170,6 +193,11 @@ class SpotifyWebPlayer extends HTMLElement {
                         <button class="control-button" id="next-button">         
                             <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%">
                                 <path fill="#b3b3b3" d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 .7.7h1.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-1.6z"></path>
+                            </svg>
+                        </button>
+                        <button class="control-button" id="repeat-button">
+                            <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="80%">
+                                <path if="repeat-path" fill="#b3b3b3" d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75v-5z"></path>
                             </svg>
                         </button>
                     </div>
@@ -183,7 +211,7 @@ class SpotifyWebPlayer extends HTMLElement {
                 <div class="volume">
                     <button id="volume-button">
                         <svg data-encore-id="icon" role="img" aria-hidden="true" viewBox="0 0 16 16" width="70%">
-                            <path  fill="#b3b3b3" d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 6.087a4.502 4.502 0 0 0 0-8.474v1.65a2.999 2.999 0 0 1 0 5.175v1.649z"></path>
+                            <path fill="#b3b3b3" d="M9.741.85a.75.75 0 0 1 .375.65v13a.75.75 0 0 1-1.125.65l-6.925-4a3.642 3.642 0 0 1-1.33-4.967 3.639 3.639 0 0 1 1.33-1.332l6.925-4a.75.75 0 0 1 .75 0zm-6.924 5.3a2.139 2.139 0 0 0 0 3.7l5.8 3.35V2.8l-5.8 3.35zm8.683 6.087a4.502 4.502 0 0 0 0-8.474v1.65a2.999 2.999 0 0 1 0 5.175v1.649z"></path>
                         </svg>
                     </button>
                     <input id="volume-input" type="range" min="0" max="100" value="100">
@@ -234,6 +262,10 @@ class SpotifyWebPlayer extends HTMLElement {
         this.shadowRoot.getElementById("back-button").addEventListener('click', () => this.handlePreviousTrack());
         this.shadowRoot.getElementById("play-button").addEventListener('click', () => this.handleTogglePlay());
         this.shadowRoot.getElementById("next-button").addEventListener('click', () => this.handleNextTrack());
+        this.shadowRoot.getElementById("shuffle-button").addEventListener('click', () => this.handleShuffleToggle());
+        this.shadowRoot.getElementById("repeat-button").addEventListener('click', () => this.handleRepeatToggle());
+
+
 
         this.currentTimeLabel = this.shadowRoot.getElementById("current-time");
         this.maxTimeLabel = this.shadowRoot.getElementById("max-time");
@@ -262,7 +294,6 @@ class SpotifyWebPlayer extends HTMLElement {
 
 
     setVolume(volumeLevel) {
-        console.log(volumeLevel)
         this.player.setVolume(volumeLevel).then(() => console.log('Volume updated!'));
     }
 
@@ -284,6 +315,71 @@ class SpotifyWebPlayer extends HTMLElement {
         this.player.nextTrack()
     }
 
+    handleShuffleToggle() {
+        const new_shuffle_state = !this.shuffle_state
+        this.callShuffleApi(new_shuffle_state);
+
+        if (new_shuffle_state) {
+            this.shadowRoot.getElementById("shuffle-path1").style.fill="#1DB954"
+            this.shadowRoot.getElementById("shuffle-path2").style.fill="#1DB954"
+        } else {
+            this.shadowRoot.getElementById("shuffle-path1").style.fill="#b3b3b3"
+            this.shadowRoot.getElementById("shuffle-path2").style.fill="#b3b3b3"
+        }
+        this.shuffle_state = new_shuffle_state;
+    }
+
+    callShuffleApi(new_shuffle_state) {
+        fetch("https://api.spotify.com/v1/me/player/shuffle?state=" + new_shuffle_state, 
+        {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.accesstoken
+            }
+        })
+    }
+
+    handleRepeatToggle() {
+        const new_repeat_state = this.nextRepeatMode(this.repeat_state);
+        this.callRepeatApi(new_repeat_state);
+        this.repeat_state = new_repeat_state;
+        if (this.repeat_state == this.RepeatMode.Off) {
+            this.shadowRoot.getElementById("repeat-button").replaceChildren(this.repeatOffIcon);
+            return;
+        } 
+        if (this.repeat_state == this.RepeatMode.Track) {
+            this.shadowRoot.getElementById("repeat-button").replaceChildren(this.repeatTrackIcon);
+            return;
+        } 
+        if (this.repeat_state == this.RepeatMode.Context) {
+            this.shadowRoot.getElementById("repeat-button").replaceChildren(this.repeatContextIcon);
+            return;
+        } 
+    }
+
+    nextRepeatMode(repeat_state) {
+        if (repeat_state === this.RepeatMode.Off) {
+            return this.RepeatMode.Track;
+        }
+        if (repeat_state === this.RepeatMode.Track) {
+            return this.RepeatMode.Context;
+        }
+        if (repeat_state === this.RepeatMode.Context) {
+            return this.RepeatMode.Off;
+        }
+        
+    }
+
+    callRepeatApi(new_repeat_state) {
+        fetch("https://api.spotify.com/v1/me/player/repeat?state=" + new_repeat_state, 
+        {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + this.accesstoken
+            }
+        })
+    }
+    
     updateProgressBar(progressInMs) {
         const currentValue = this.progress.value;
         this.currentTimeLabel.textContent = this.formatTime(Number(currentValue) + Number(progressInMs))
@@ -358,8 +454,9 @@ class SpotifyWebPlayer extends HTMLElement {
             this.progress.dispatchEvent(new Event("input"));
             this.volume.dispatchEvent(new Event("input"));
             this.player.addListener("ready", ({ device_id }) => {
+                this.device_id = device_id;
                 this.dispatchEvent(new CustomEvent("player-ready", { detail: device_id }));
-
+            
                 this.player.getVolume().then(volume => {
                     let volume_percentage = volume * 100;
                     this.volume.value = volume_percentage;
@@ -403,4 +500,5 @@ class SpotifyWebPlayer extends HTMLElement {
         };
     }
 }
+
 window.customElements.define('spotify-web-player', SpotifyWebPlayer);

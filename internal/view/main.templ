@@ -1,14 +1,25 @@
 package view
 
 
-templ Main(accessToken string) {
+templ Main(accessToken string, loginLink string) {
 	<html>
 		<head>
 		  	<link href="http://localhost:4200/static/css/output.css" rel="stylesheet"></link>
   			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<script src="https://sdk.scdn.co/spotify-player.js"></script>
 			<script src="http://localhost:4200/static/js/player.js"></script>
+
 		</head>
+		if (len(accessToken) != 0) {
+			@MainBody(accessToken)
+		} else {
+			@Login(loginLink)
+		}
+
+	</html>
+}
+
+templ MainBody(accessToken string) {
 		<body class="overflow-hidden bg-neutral-700">
 			<script>		
 				document.addEventListener("DOMContentLoaded", function() {
@@ -36,7 +47,7 @@ templ Main(accessToken string) {
 				</div>
 
 				<div class="flex-shrink-0 w-1/3 overflow-y-auto bg-neutral-700 text-white m-2"  >
-						<div hx-get="/queue" hx-trigger="song-change from:#player delay:100ms" hx-target="#queueResult" id="queue">
+						<div hx-get="/queue" hx-trigger="song-change from:#player delay:300ms" hx-target="#queueResult" id="queue">
 						</div>
 					<div id="queueResult"></div>
 				</div>
@@ -46,6 +57,24 @@ templ Main(accessToken string) {
 				<spotify-web-player id="player" accesstoken={ accessToken }></spotify-web-player>
 			</div>
 
+		</body>
+}
+
+script gotoLoginLink(loginLink string) {
+	window.location.href = loginLink
+}
+
+templ Login(loginLink string) {
+	<html>
+		<head>
+		  	<link href="http://localhost:4200/static/css/output.css" rel="stylesheet"></link>
+		</head>
+		<body class="flex justify-center items-center h-screen bg-gray-100" >
+			<div class="bg-neutral-00">
+			    <button onclick={gotoLoginLink(loginLink)} class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline">
+        			Login
+   				 </button>
+			</div>
 		</body>
 	</html>
 }

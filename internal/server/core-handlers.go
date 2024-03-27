@@ -109,10 +109,6 @@ func (s *Server) RefreshAccessToken(session *models.UserSession) error {
 	return nil
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	view.Login(buildSpotifyURL()).Render(r.Context(), w)
-}
-
 func (s *Server) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 
@@ -194,12 +190,21 @@ func setRefreshTokenQueryParams(refreshToken string) url.Values {
 }
 
 func MainHandler(w http.ResponseWriter, r *http.Request) {
-	session := r.Context().Value(sessionContext).(*models.UserSession)
-	view.Main(session.AccessToken).Render(r.Context(), w)
+	sessionCtxEntry := r.Context().Value(sessionContextKey)
+	fmt.Println(sessionCtxEntry)
+	if sessionCtxEntry == nil {
+		view.Main("", buildSpotifyURL()).Render(r.Context(), w)
+		return
+	}
+	session, ok := sessionCtxEntry.(*models.UserSession)
+	if !ok {
+		panic("session in context is not a models.UserSession!")
+	}
+	view.Main(session.AccessToken, "").Render(r.Context(), w)
 }
 
 func (s *Server) DevicesHandler(w http.ResponseWriter, r *http.Request) {
-	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	session, ok := r.Context().Value(sessionContextKey).(*models.UserSession)
 	if !ok {
 		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}

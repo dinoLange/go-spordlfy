@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const sessionContext = "session"
+const sessionContextKey = "session"
 
 type Middleware func(http.Handler) http.Handler
 
@@ -54,8 +54,6 @@ func (s *Server) RegisterRoutes() http.Handler {
 	app.Handle("GET /callback", http.HandlerFunc(s.CallbackHandler))
 
 	app.Handle("GET /static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("internal/static"))))
-
-	app.Handle("GET /login", http.HandlerFunc(LoginHandler))
 
 	app.Handle("GET /setDevice", http.HandlerFunc(s.DevicesHandler))
 

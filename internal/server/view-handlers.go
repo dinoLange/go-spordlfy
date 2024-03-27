@@ -7,7 +7,7 @@ import (
 )
 
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	session, ok := r.Context().Value(sessionContextKey).(*models.UserSession)
 	if !ok {
 		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
@@ -22,7 +22,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlayListsHandler(w http.ResponseWriter, r *http.Request) {
-	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	session, ok := r.Context().Value(sessionContextKey).(*models.UserSession)
 	if !ok {
 		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
@@ -36,7 +36,7 @@ func PlayListsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func PlayHandler(w http.ResponseWriter, r *http.Request) {
-	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	session, ok := r.Context().Value(sessionContextKey).(*models.UserSession)
 	if !ok {
 		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
@@ -53,7 +53,7 @@ func PlayHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func QueueHandler(w http.ResponseWriter, r *http.Request) {
-	session, ok := r.Context().Value(sessionContext).(*models.UserSession)
+	session, ok := r.Context().Value(sessionContextKey).(*models.UserSession)
 	if !ok {
 		http.Error(w, "failed to get session info", http.StatusInternalServerError)
 	}
